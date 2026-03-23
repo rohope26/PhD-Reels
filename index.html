@@ -83,12 +83,22 @@ function startWords() {
   }
 
   let index = 0;
+  function speakWord(word) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(word);
+      window.speechSynthesis.speak(utter);
+    }
+  }
+
   textEl.textContent = chunks[index];
+  speakWord(chunks[index]);
 
   intervalId = setInterval(() => {
     index++;
     if (index < chunks.length) {
       textEl.textContent = chunks[index];
+      speakWord(chunks[index]);
     } else {
       clearInterval(intervalId);
     }
