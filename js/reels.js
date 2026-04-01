@@ -1,37 +1,49 @@
-let intervalId;
+let utterance = null;
 
 function startWords() {
-  clearInterval(intervalId);
-
   const input = document.getElementById("overlayInput").value.trim();
   const textEl = document.getElementById("text");
+  const videoSelect = document.getElementById("videoSelect");
+  const videoFrame = document.getElementById("videoFrame");
+
+  if (!input) {
+    textEl.textContent = "Overlay Text";
+    return;
+  }
+
+  const selectedVideo = videoSelect.value;
+  videoFrame.src = selectedVideo + "&autoplay=1";
+
+  window.speechSynthesis.cancel();
 
   const words = input.split(/\s+/);
-  const chunks = [];
+  const wordPositions = [];
+  let searchStart = 0;
 
-  for (let i = 0; i < words.length; i += 1) {
-    chunks.push(words.slice(i, i + 1).join(" "));
+  for (const word of words) {
+    const start = input.indexOf(word, searchStart);
+    const end = start + word.length;
+    wordPositions.push({ word, start, end });
+    searchStart = end;
   }
 
-  let index = 0;
-  function speakWord(word) {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(word);
-      window.speechSynthesis.speak(utter);
-    }
-  }
+  textEl.textContent = words[0];
 
-  textEl.textContent = chunks[index];
-  speakWord(chunks[index]);
+  utterance = new SpeechSynthesisUtterance(input);
 
-  intervalId = setInterval(() => {
-    index++;
-    if (index < chunks.length) {
-      textEl.textContent = chunks[index];
-      speakWord(chunks[index]);
-    } else {
-      clearInterval(intervalId);
+  utterance.onboundary = (event) => {
+    if (event.name !== "word") return;
+
+    const charIndex = event.charIndex;
+
+    const current = wordPositions.find(
+      (item) => charIndex >= item.start && charIndex < item.end
+    );
+
+    if (current) {
+      textEl.textContent = current.word;
     }
-  }, 1000);
+  };
+
+  window.speechSynthesis.speak(utterance);
 }

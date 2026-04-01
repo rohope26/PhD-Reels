@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="styles/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
 
 <div class="video-wrapper">
   <iframe
-    src="https://www.youtube.com/embed/u7kdVe8q5zs?si=kV7KUlVRO0Jg_9oZ&autoplay=1&mute=1"
+    id="videoFrame"
+    src="https://www.youtube.com/embed/u7kdVe8q5zs&mute=1"
     title="YouTube video player"
     frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
@@ -19,12 +20,30 @@
 </div>
 
 <div class="controls">
+  <label for="videoSelect">Choose a video:</label>
+  <select id="videoSelect">
+    <option value="https://www.youtube.com/embed/u7kdVe8q5zs?si=hupChMPSgELPU0zj&mute=1">
+      Minecraft Obby
+    </option>
+    <option value="https://www.youtube.com/embed/vTfD20dbxho?si=toqjWDQ8z60gVynz&mute=1">
+      Subway Surfers
+    </option>
+    <option value="https://www.youtube.com/embed/F3dKWgNu1FY?si=I9yfs-C9C4jZWiou&mute=1">
+      Survival Chance
+    </option>
+    <option value="https://www.youtube.com/embed/F3dKWgNu1FY?si=I9yfs-C9C4jZWiou&mute=1">
+      Survival Chance
+    </option>
+    <option value="https://www.youtube.com/embed/2N_R5f5jEeQ?si=OMhKFvyzSHU0iNMl&mute=1">
+      Steel Coil vs Bus
+    </option>
+  </select>
+
   <label for="overlayInput">Enter overlay text:</label>
   <input type="text" id="overlayInput" placeholder="Type a sentence here...">
   <button onclick="startWords()">Place words over text</button>
 </div>
 
 <script src="js/reels.js"></script>
-
 </body>
 </html>
