@@ -1,49 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PhD Reels</title>
   <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
+  <main class="page-shell">
+    <section class="composer-card" aria-label="Reel generator">
+      <div class="field-group">
+        <div class="field-heading">
+          <label class="field-label" for="overlayInput">Text</label>
+        </div>
 
-<div class="video-wrapper">
-  <iframe
-    id="videoFrame"
-    src="https://www.youtube.com/embed/u7kdVe8q5zs&mute=1"
-    title="YouTube video player"
-    frameborder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-    referrerpolicy="strict-origin-when-cross-origin"
-    allowfullscreen>
-  </iframe>
-  <div id="text">Overlay Text</div>
-</div>
+        <div class="textarea-wrap">
+          <textarea
+            id="overlayInput"
+            class="script-input"
+            rows="6"
+            placeholder="Enter your reading here..."
+          ></textarea>
+        </div>
 
-<div class="controls">
-  <label for="videoSelect">Choose a video:</label>
-  <select id="videoSelect">
-    <option value="https://www.youtube.com/embed/u7kdVe8q5zs?si=hupChMPSgELPU0zj&mute=1">
-      Minecraft Obby
-    </option>
-    <option value="https://www.youtube.com/embed/vTfD20dbxho?si=toqjWDQ8z60gVynz&mute=1">
-      Subway Surfers
-    </option>
-    <option value="https://www.youtube.com/embed/F3dKWgNu1FY?si=I9yfs-C9C4jZWiou&mute=1">
-      Survival Chance
-    </option>
-    <option value="https://www.youtube.com/embed/F3dKWgNu1FY?si=I9yfs-C9C4jZWiou&mute=1">
-      Survival Chance
-    </option>
-    <option value="https://www.youtube.com/embed/2N_R5f5jEeQ?si=OMhKFvyzSHU0iNMl&mute=1">
-      Steel Coil vs Bus
-    </option>
-  </select>
+        <div class="guidance-row" aria-live="polite">
+        </div>
+      </div>
 
-  <label for="overlayInput">Enter overlay text:</label>
-  <input type="text" id="overlayInput" placeholder="Type a sentence here...">
-  <button onclick="startWords()">Place words over text</button>
-</div>
+      <div class="control-grid">
+        <div class="field-group">
+          <label class="field-label" for="videoSelect">Video</label>
+          <div class="select-wrap">
+            <select id="videoSelect" class="control-select" aria-label="Choose a video template"></select>
+            <span class="select-caret" aria-hidden="true"></span>
+          </div>
+        </div>
 
-<script src="js/reels.js"></script>
+        <div class="field-group">
+          <div class="speed-label-row">
+            <label class="field-label" for="speedRange">Playback Speed</label>
+            <span id="speedValue" class="speed-value">1.0x</span>
+          </div>
+          <div class="slider-wrap">
+            <input
+              id="speedRange"
+              class="speed-slider"
+              type="range"
+              min="0.5"
+              max="2"
+              step="0.25"
+              value="1"
+            >
+            <div class="slider-scale" aria-hidden="true">
+              <span>0.5x</span>
+              <span>1.0x</span>
+              <span>1.5x</span>
+              <span>2.0x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button id="generateButton" class="generate-button" type="button">
+        <span class="button-icon" aria-hidden="true"></span>
+        <span>Generate Reel</span>
+      </button>
+
+      <section class="template-rail" aria-label="Video options">
+        <div class="template-rail-head">
+          <h2>Video Options</h2>
+        </div>
+        <div class="rail-window">
+          <div id="thumbnailTrack" class="thumbnail-track"></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="preview-card" aria-label="Reel preview">
+      <div class="video-wrapper">
+        <iframe
+          id="videoFrame"
+          src="https://www.youtube.com/embed/u7kdVe8q5zs?mute=1&enablejsapi=1&playsinline=1"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+        <div id="text">Overlay Text</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="js/reels.js"></script>
 </body>
 </html>
