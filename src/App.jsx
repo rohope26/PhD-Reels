@@ -51,9 +51,31 @@ const templates = [
 ];
 
 function buildEmbedUrl(template, autoplay = false, loop = false) {
-  const autoplayParam = autoplay ? "&autoplay=1" : "";
-  const loopParam = loop ? `&loop=1&playlist=${template.videoId}` : "";
-  return `https://www.youtube.com/embed/${template.videoId}?${template.params}&enablejsapi=1&playsinline=1${autoplayParam}${loopParam}`;
+  const params = new URLSearchParams(template.params);
+
+  params.set("playsinline", "1");
+  params.set("controls", "0");
+  params.set("disablekb", "1");
+  params.set("fs", "0");
+  params.set("iv_load_policy", "3");
+  params.set("modestbranding", "1");
+  params.set("rel", "0");
+
+  if (autoplay) {
+    params.set("autoplay", "1");
+  } else {
+    params.delete("autoplay");
+  }
+
+  if (loop) {
+    params.set("loop", "1");
+    params.set("playlist", template.videoId);
+  } else {
+    params.delete("loop");
+    params.delete("playlist");
+  }
+
+  return `https://www.youtube.com/embed/${template.videoId}?${params.toString()}`;
 }
 
 function getWordPositions(input) {
