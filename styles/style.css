@@ -30,6 +30,31 @@ body {
     linear-gradient(180deg, #fbfaf8 0%, var(--page-bg) 100%);
 }
 
+button,
+textarea {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+#banner {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  padding: 32px 0 20px 0;
+  text-align: center;
+  box-shadow: var(--shadow);
+  font-family: inherit;
+}
+#banner h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
 body::before {
   content: "";
   position: fixed;
@@ -138,6 +163,13 @@ body::before {
   transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
 }
 
+.control-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
 .script-input {
   min-height: 150px;
   resize: vertical;
@@ -201,23 +233,54 @@ body::before {
 }
 
 .control-select {
-  appearance: none;
   height: 48px;
-  padding: 0 46px 0 16px;
+  padding: 0 14px 0 16px;
   font-size: 0.95rem;
   font-weight: 600;
 }
 
-.select-caret {
+.select-icon {
+  display: inline-flex;
+  color: var(--accent);
+}
+
+.select-content {
+  z-index: 20;
+  min-width: var(--radix-select-trigger-width);
+  overflow: hidden;
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.16);
+}
+
+.select-viewport {
+  padding: 6px;
+}
+
+.select-item {
+  position: relative;
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  border-radius: 10px;
+  padding: 0 36px 0 12px;
+  color: var(--text-strong);
+  font-size: 0.94rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.select-item[data-highlighted] {
+  background: rgba(24, 24, 27, 0.07);
+}
+
+.select-item-indicator {
   position: absolute;
-  top: 50%;
-  right: 18px;
-  width: 10px;
-  height: 10px;
-  border-right: 2px solid var(--accent);
-  border-bottom: 2px solid var(--accent);
-  transform: translateY(-70%) rotate(45deg);
-  pointer-events: none;
+  right: 12px;
+  display: inline-flex;
+  color: var(--accent);
 }
 
 .speed-label-row {
@@ -243,16 +306,33 @@ body::before {
 }
 
 .speed-slider {
+  position: relative;
+  display: flex;
+  align-items: center;
   width: 100%;
-  appearance: none;
-  height: 12px;
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, var(--accent) var(--fill-percent, 33%), #e7e5e4 var(--fill-percent, 33%));
+  height: 28px;
+  touch-action: none;
+  cursor: pointer;
 }
 
-.speed-slider::-webkit-slider-thumb {
-  appearance: none;
+.speed-slider-track {
+  position: relative;
+  flex: 1;
+  height: 12px;
+  border-radius: 999px;
+  background: #e7e5e4;
+  overflow: hidden;
+}
+
+.speed-slider-range {
+  position: absolute;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.speed-slider-thumb {
+  display: block;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -262,20 +342,9 @@ body::before {
   cursor: pointer;
 }
 
-.speed-slider::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--accent);
-  border: 0;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-}
-
-.speed-slider::-moz-range-track {
-  height: 12px;
-  border-radius: 999px;
-  background: transparent;
+.speed-slider-thumb:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.07), 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .slider-scale {
@@ -386,6 +455,7 @@ body::before {
 }
 
 .thumb-media {
+  display: block;
   aspect-ratio: 16 / 9;
   border-radius: 12px;
   background-size: cover;
@@ -402,10 +472,12 @@ body::before {
 }
 
 .thumb-meta {
+  display: block;
   padding: 7px 3px 1px;
 }
 
 .thumb-title {
+  display: block;
   margin: 0;
   font-size: 0.88rem;
   font-weight: 700;
@@ -413,6 +485,7 @@ body::before {
 }
 
 .thumb-copy {
+  display: block;
   margin: 4px 0 0;
   font-size: 0.75rem;
   color: var(--text-muted);
@@ -433,7 +506,7 @@ body::before {
   height: 100%;
 }
 
-#text {
+.caption-text {
   position: absolute;
   left: 50%;
   top: 50%;
