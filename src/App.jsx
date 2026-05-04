@@ -2,7 +2,7 @@ import * as AspectRatio from "@radix-ui/react-aspect-ratio";
 import * as Label from "@radix-ui/react-label";
 import * as Select from "@radix-ui/react-select";
 import * as Slider from "@radix-ui/react-slider";
-import { Check, ChevronDown, Play } from "lucide-react";
+import { Check, ChevronDown, FileText, Play, Upload } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const templates = [
@@ -93,15 +93,45 @@ function getWordPositions(input) {
   return { words, wordPositions };
 }
 
+async function extractPdfText(file) {
+  const [pdfjsLib, pdfWorker] = await Promise.all([
+    import("pdfjs-dist"),
+    import("pdfjs-dist/build/pdf.worker.mjs?url")
+  ]);
+
+  pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker.default;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pages = [];
+
+  for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+    const page = await pdf.getPage(pageNumber);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item) => ("str" in item ? item.str : ""))
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (pageText) pages.push(pageText);
+  }
+
+  return pages.join("\n\n");
+}
+
 function App() {
   const [scriptText, setScriptText] = useState("");
   const [selectedIndex, setSelectedIndex] = useState("0");
   const [speed, setSpeed] = useState(1);
   const [caption, setCaption] = useState("Overlay Text");
   const [embedUrl, setEmbedUrl] = useState(() => buildEmbedUrl(templates[0]));
+  const [pdfStatus, setPdfStatus] = useState("");
+  const [isExtractingPdf, setIsExtractingPdf] = useState(false);
   const narrationRunIdRef = useRef(0);
   const reelIsPlayingRef = useRef(false);
   const inputRef = useRef(null);
+  const pdfInputRef = useRef(null);
 
   const selectedTemplate = templates[Number(selectedIndex)];
   const duplicatedTemplates = useMemo(() => [...templates, ...templates], []);
@@ -160,6 +190,38 @@ function App() {
     };
   }, []);
 
+  async function handlePdfUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      setPdfStatus("Choose a PDF file.");
+      event.target.value = "";
+      return;
+    }
+
+    setIsExtractingPdf(true);
+    setPdfStatus(`Reading ${file.name}...`);
+
+    try {
+      const text = await extractPdfText(file);
+
+      if (!text) {
+        setPdfStatus("No selectable text found in that PDF.");
+        return;
+      }
+
+      setScriptText(text);
+      setCaption("Overlay Text");
+      setPdfStatus(`Imported ${file.name}`);
+    } catch {
+      setPdfStatus("Could not read that PDF.");
+    } finally {
+      setIsExtractingPdf(false);
+      event.target.value = "";
+    }
+  }
+
   function startWords() {
     const input = scriptText.trim();
 
@@ -217,6 +279,32 @@ function App() {
             <Label.Root className="field-label" htmlFor="overlayInput">
               Text
             </Label.Root>
+          </div>
+
+          <div className="pdf-import-row">
+            <input
+              ref={pdfInputRef}
+              className="pdf-input"
+              id="pdfInput"
+              type="file"
+              accept="application/pdf"
+              onChange={handlePdfUpload}
+            />
+            <button
+              className="pdf-import-button"
+              type="button"
+              disabled={isExtractingPdf}
+              onClick={() => pdfInputRef.current?.click()}
+            >
+              <Upload size={17} aria-hidden="true" />
+              <span>{isExtractingPdf ? "Reading PDF" : "Import PDF"}</span>
+            </button>
+            {pdfStatus ? (
+              <p className="pdf-status">
+                <FileText size={15} aria-hidden="true" />
+                <span>{pdfStatus}</span>
+              </p>
+            ) : null}
           </div>
 
           <div className="textarea-wrap">

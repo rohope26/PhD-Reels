@@ -147,6 +147,64 @@ body::before {
   line-height: 1.35;
 }
 
+.pdf-import-row {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pdf-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.pdf-import-button {
+  min-height: 38px;
+  border: 1px solid rgba(24, 24, 27, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--text-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 13px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.pdf-import-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(24, 24, 27, 0.28);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+.pdf-import-button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+  transform: none;
+}
+
+.pdf-status {
+  min-height: 24px;
+  margin: 0;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  line-height: 1.25;
+}
+
 .textarea-wrap,
 .select-wrap {
   position: relative;
@@ -586,7 +644,8 @@ body::before {
   }
 
   .template-rail-head,
-  .guidance-row {
+  .guidance-row,
+  .pdf-import-row {
     display: grid;
     gap: 8px;
   }
