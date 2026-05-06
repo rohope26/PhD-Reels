@@ -2,7 +2,7 @@ import * as AspectRatio from "@radix-ui/react-aspect-ratio";
 import * as Label from "@radix-ui/react-label";
 import * as Select from "@radix-ui/react-select";
 import * as Slider from "@radix-ui/react-slider";
-import { Check, ChevronDown, FileText, Play, Upload } from "lucide-react";
+import { Check, ChevronDown, FileText, Pause, Play, RotateCcw, Upload } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const templates = [
@@ -60,6 +60,7 @@ function buildEmbedUrl(template, autoplay = false, loop = false) {
   params.set("iv_load_policy", "3");
   params.set("modestbranding", "1");
   params.set("rel", "0");
+  params.set("enablejsapi", "1");
 
   if (autoplay) {
     params.set("autoplay", "1");
@@ -128,10 +129,13 @@ function App() {
   const [embedUrl, setEmbedUrl] = useState(() => buildEmbedUrl(templates[0]));
   const [pdfStatus, setPdfStatus] = useState("");
   const [isExtractingPdf, setIsExtractingPdf] = useState(false);
+  const [isReelActive, setIsReelActive] = useState(false);
+  const [isReelPaused, setIsReelPaused] = useState(false);
   const narrationRunIdRef = useRef(0);
   const reelIsPlayingRef = useRef(false);
   const inputRef = useRef(null);
   const pdfInputRef = useRef(null);
+  const videoFrameRef = useRef(null);
   const railWindowRef = useRef(null);
   const railPauseUntilRef = useRef(0);
   const railScrollPositionRef = useRef(0);
@@ -181,10 +185,30 @@ function App() {
     setEmbedUrl(buildEmbedUrl(template, autoplay, autoplay));
   }
 
-  useEffect(() => {
-    window.speechSynthesis?.cancel();
+  function postYouTubeCommand(command) {
+    videoFrameRef.current?.contentWindow?.postMessage(
+      JSON.stringify({
+        event: "command",
+        func: command,
+        args: []
+      }),
+      "https://www.youtube.com"
+    );
+  }
+
+  function resetReel() {
+    narrationRunIdRef.current += 1;
     reelIsPlayingRef.current = false;
+    window.speechSynthesis?.cancel();
+    postYouTubeCommand("stopVideo");
+    setIsReelActive(false);
+    setIsReelPaused(false);
     setVideo(selectedTemplate, false);
+    setCaption("Overlay Text");
+  }
+
+  useEffect(() => {
+    resetReel();
   }, [selectedTemplate]);
 
   useEffect(() => {
@@ -314,6 +338,8 @@ function App() {
     reelIsPlayingRef.current = true;
     window.speechSynthesis.cancel();
     setVideo(selectedTemplate, true);
+    setIsReelActive(true);
+    setIsReelPaused(false);
 
     const { words, wordPositions } = getWordPositions(input);
     setCaption(words[0]);
@@ -337,6 +363,8 @@ function App() {
       reelIsPlayingRef.current = false;
       setVideo(selectedTemplate, false);
       setCaption(words[words.length - 1]);
+      setIsReelActive(false);
+      setIsReelPaused(false);
     };
 
     utterance.onerror = () => {
@@ -344,9 +372,24 @@ function App() {
 
       reelIsPlayingRef.current = false;
       setVideo(selectedTemplate, false);
+      setIsReelActive(false);
+      setIsReelPaused(false);
     };
 
     window.speechSynthesis.speak(utterance);
+  }
+
+  function toggleReelPlayback() {
+    if (isReelPaused) {
+      window.speechSynthesis?.resume();
+      postYouTubeCommand("playVideo");
+      setIsReelPaused(false);
+      return;
+    }
+
+    window.speechSynthesis?.pause();
+    postYouTubeCommand("pauseVideo");
+    setIsReelPaused(true);
   }
 
   return (
@@ -467,10 +510,27 @@ function App() {
           </div>
         </div>
 
-        <button className="generate-button" type="button" onClick={startWords}>
-          <Play size={19} fill="currentColor" aria-hidden="true" />
-          <span>Generate Reel</span>
-        </button>
+        {isReelActive ? (
+          <div className="reel-controls" aria-label="Reel playback controls">
+            <button className="generate-button" type="button" onClick={toggleReelPlayback}>
+              {isReelPaused ? (
+                <Play size={19} fill="currentColor" aria-hidden="true" />
+              ) : (
+                <Pause size={19} fill="currentColor" aria-hidden="true" />
+              )}
+              <span>{isReelPaused ? "Play" : "Pause"}</span>
+            </button>
+            <button className="reset-button" type="button" onClick={resetReel}>
+              <RotateCcw size={18} aria-hidden="true" />
+              <span>Reset</span>
+            </button>
+          </div>
+        ) : (
+          <button className="generate-button" type="button" onClick={startWords}>
+            <Play size={19} fill="currentColor" aria-hidden="true" />
+            <span>Generate Reel</span>
+          </button>
+        )}
 
         <section className="template-rail" aria-label="Video options">
           <div className="template-rail-head">
@@ -517,6 +577,7 @@ function App() {
       <section className="preview-card" aria-label="Reel preview">
         <AspectRatio.Root className="video-wrapper" ratio={9 / 16}>
           <iframe
+            ref={videoFrameRef}
             key={embedUrl}
             src={embedUrl}
             title="YouTube video player"
