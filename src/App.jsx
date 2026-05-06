@@ -132,6 +132,9 @@ function App() {
   const reelIsPlayingRef = useRef(false);
   const inputRef = useRef(null);
   const pdfInputRef = useRef(null);
+  const railWindowRef = useRef(null);
+  const railPauseUntilRef = useRef(0);
+  const railScrollPositionRef = useRef(0);
 
   const selectedTemplate = templates[Number(selectedIndex)];
   const duplicatedTemplates = useMemo(() => [...templates, ...templates], []);
@@ -189,6 +192,81 @@ function App() {
       window.speechSynthesis?.cancel();
     };
   }, []);
+
+  useEffect(() => {
+    const railWindow = railWindowRef.current;
+
+    if (!railWindow || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return undefined;
+    }
+
+    let frameId;
+    let lastFrameTime = performance.now();
+    railScrollPositionRef.current = railWindow.scrollLeft;
+    const pixelsPerSecond = 28;
+
+    function wrapRailScroll() {
+      const repeatWidth = railWindow.scrollWidth / 2;
+
+      if (repeatWidth <= 0) return;
+
+      if (railScrollPositionRef.current >= repeatWidth) {
+        railScrollPositionRef.current -= repeatWidth;
+        railWindow.scrollLeft = railScrollPositionRef.current;
+      }
+    }
+
+    function tick(frameTime) {
+      const elapsed = frameTime - lastFrameTime;
+      lastFrameTime = frameTime;
+
+      if (frameTime >= railPauseUntilRef.current) {
+        railScrollPositionRef.current += (pixelsPerSecond * elapsed) / 1000;
+        railWindow.scrollLeft = railScrollPositionRef.current;
+        wrapRailScroll();
+      }
+
+      frameId = window.requestAnimationFrame(tick);
+    }
+
+    frameId = window.requestAnimationFrame(tick);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, []);
+
+  function pauseRailAutoscroll(duration = 900) {
+    railPauseUntilRef.current = performance.now() + duration;
+  }
+
+  function handleRailWheel(event) {
+    pauseRailAutoscroll();
+
+    if (Math.abs(event.deltaY) > Math.abs(event.deltaX)) {
+      event.currentTarget.scrollLeft += event.deltaY;
+      event.preventDefault();
+    }
+
+    const repeatWidth = event.currentTarget.scrollWidth / 2;
+    railScrollPositionRef.current = event.currentTarget.scrollLeft;
+
+    if (railScrollPositionRef.current >= repeatWidth) {
+      railScrollPositionRef.current -= repeatWidth;
+      event.currentTarget.scrollLeft = railScrollPositionRef.current;
+    }
+  }
+
+  function handleRailScroll(event) {
+    const repeatWidth = event.currentTarget.scrollWidth / 2;
+    railScrollPositionRef.current = event.currentTarget.scrollLeft;
+
+    if (repeatWidth > 0 && railScrollPositionRef.current >= repeatWidth) {
+      railScrollPositionRef.current -= repeatWidth;
+      event.currentTarget.scrollLeft = railScrollPositionRef.current;
+    }
+  }
+
 
   async function handlePdfUpload(event) {
     const file = event.target.files?.[0];
@@ -398,7 +476,14 @@ function App() {
           <div className="template-rail-head">
             <h2>Video Options</h2>
           </div>
-          <div className="rail-window">
+          <div
+            ref={railWindowRef}
+            className="rail-window"
+            onPointerDown={() => pauseRailAutoscroll(1400)}
+            onScroll={handleRailScroll}
+            onTouchStart={() => pauseRailAutoscroll(1400)}
+            onWheel={handleRailWheel}
+          >
             <div className="thumbnail-track">
               {duplicatedTemplates.map((template, duplicateIndex) => {
                 const actualIndex = duplicateIndex % templates.length;

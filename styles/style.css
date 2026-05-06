@@ -472,23 +472,37 @@ body::before {
 }
 
 .rail-window {
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-inline: -8px;
-  padding-inline: 8px;
+  padding: 0 8px 12px;
+  overscroll-behavior-x: contain;
+  scrollbar-color: rgba(24, 24, 27, 0.24) transparent;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.rail-window::-webkit-scrollbar {
+  height: 8px;
+}
+
+.rail-window::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rail-window::-webkit-scrollbar-thumb {
+  background: rgba(24, 24, 27, 0.2);
+  border-radius: 999px;
 }
 
 .thumbnail-track {
   display: flex;
   gap: 14px;
   width: max-content;
-  animation: rail-scroll 28s linear infinite;
-}
-
-.rail-window:hover .thumbnail-track {
-  animation-play-state: paused;
 }
 
 .thumb-card {
+  flex: 0 0 auto;
   width: 148px;
   font: inherit;
   text-align: left;
@@ -582,25 +596,11 @@ body::before {
   pointer-events: none;
 }
 
-@keyframes rail-scroll {
-  from {
-    transform: translateX(0);
-  }
-
-  to {
-    transform: translateX(calc(-50% - 7px));
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     scroll-behavior: auto !important;
-  }
-
-  .thumbnail-track {
-    animation: none;
   }
 
   .generate-button,
