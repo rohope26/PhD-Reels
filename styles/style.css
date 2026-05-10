@@ -41,18 +41,20 @@ textarea {
 
 #banner {
   width: 100%;
-  background: var(--accent);
-  color: #fff;
-  padding: 32px 0 20px 0;
-  text-align: center;
-  box-shadow: var(--shadow);
+  background: transparent;
+  color: var(--text-strong);
+  padding: 14px 0 0;
+  text-align: left;
   font-family: inherit;
 }
+
 #banner h1 {
-  margin: 0;
-  font-size: 2.5rem;
+  width: min(1160px, calc(100vw - 32px));
+  margin: 0 auto;
+  font-size: 1.15rem;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
 }
 
 body::before {
